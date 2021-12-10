@@ -7,6 +7,11 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
+// Errs
+var (
+	ErrNoRow = badger.ErrKeyNotFound
+)
+
 // Cache
 type Cache struct {
 	db *badger.DB
@@ -60,6 +65,9 @@ func (c *Cache) Get(key string) ([]byte, error) {
 	if err := c.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
 		if err != nil {
+			if err == badger.ErrKeyNotFound {
+				return ErrNoRow
+			}
 			return err
 		}
 
